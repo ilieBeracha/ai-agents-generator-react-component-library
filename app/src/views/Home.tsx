@@ -1,18 +1,24 @@
 import { useEffect } from "react";
 import { agentsStore } from "@/store/agentsStore";
 import { useStore } from "zustand";
+import { DynamicComponentWrapper } from "@/components/DynamicComponentWrapper";
 
 export default function Home() {
   const useAgentsStore = useStore(agentsStore);
 
-  // const generatedCode = JSON.parse(useAgentsStore.generations[0]?.resultCode)
-  //   .code.replace(/\\n/g, "\n")
-  //   .replace(/\\"/g, '"');
-
   useEffect(() => {
     useAgentsStore.fetchGenerations();
   }, []);
+
+  const generations = useAgentsStore.generations;
+
   return (
-    <div onClick={() => console.log(useAgentsStore.generations)}>Home</div>
+    <div>
+      {generations.length > 0 ? (
+        <DynamicComponentWrapper generations={generations} />
+      ) : (
+        <p>Loading component...</p>
+      )}
+    </div>
   );
 }

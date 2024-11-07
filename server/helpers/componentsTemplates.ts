@@ -17,7 +17,11 @@ export const componentTemplates = {
       types: `type ButtonProps = { 
             label: string; 
             onClick: () => void; 
+            className?: string;
           };`,
+      styleRules: {
+        defaultClasses: "w-40 h-12 text-base font-medium rounded-md",
+      },
     },
   },
   input: {
@@ -132,6 +136,10 @@ export const componentTemplates = {
             validationSchema?: object;
             initialValues?: object;
           };`,
+      styleRules: {
+        defaultClasses:
+          "p-6 space-y-4 border border-gray-300 rounded-lg shadow-md",
+      },
     },
   },
 };

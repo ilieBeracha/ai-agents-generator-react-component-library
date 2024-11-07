@@ -69,14 +69,26 @@ export const executeAgents = async (
     }),
     createTask({
       title: "Component Structure Design",
-      description: `Design a TypeScript React component for ${componentName} based on the research.\n
-      - Export the component as "export default function ${componentName}()".
-      - Include a "Props" TypeScript interface for dynamic elements and a "defaultProps" object for sample display data.
-      Example structure:\n
-      "export default function ${componentName}(props: ${componentName}Props) { return (<div>...</div>); }"`,
+      description: `Design a plain JavaScript React component for ${componentName}.\n
+        - Avoid export statements or imports.
+        - Return the component function directly so it can be evaluated as an inline function.
+        - Include default values for props within the component.
+        Example structure:\n
+        "function ${componentName}(props) { return (<div>...</div>); }"`,
       expectedOutput: `{
-        "code": "import React from 'react';\\n\\ninterface ${componentName}Props {\\n  label?: string;\\n  styleType?: 'primary' | 'secondary';\\n  isDisabled?: boolean;\\n  isLoading?: boolean;\\n  onClick: () => void;\\n}\\n\\nconst defaultProps: ${componentName}Props = {\\n  label: 'Click Me',\\n  styleType: 'primary',\\n  isDisabled: false,\\n  isLoading: false,\\n  onClick: () => console.log('Button clicked!'),\\n};\\n\\nexport default function ${componentName}({ label, styleType, isDisabled, isLoading, onClick }: ${componentName}Props) {\\n  return (\\n    <button\\n      className={\`px-4 py-2 font-semibold text-white rounded-lg focus:outline-none transition duration-300 ease-in-out \${styleType === 'primary' ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-500 hover:bg-gray-600'} \${isDisabled ? 'bg-gray-300 cursor-not-allowed' : ''} \${isLoading ? 'opacity-50' : ''}\`}\\n      onClick={!isDisabled ? onClick : undefined}\\n      disabled={isDisabled}\\n      aria-busy={isLoading}\\n    >\\n      {isLoading ? <span className=\\"loader animation-spin inline-block mr-2\\"></span> : label}\\n    </button>\\n  );\\n};\\n\\n${componentName}.defaultProps = defaultProps;",
-        "notes": "This template includes a TypeScript interface, props, and defaultProps for ${componentName} in React.",
+        "code": "function ${componentName}({ label = 'Default Button', styleType = 'primary', isDisabled = false, isLoading = false, onClick = () => alert('Button clicked!') }) {
+          return (
+            <button
+              className={\`px-4 py-2 font-semibold text-white rounded-lg focus:outline-none transition duration-300 ease-in-out \${styleType === 'primary' ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-500 hover:bg-gray-600'} \${isDisabled ? 'bg-gray-300 cursor-not-allowed' : ''} \${isLoading ? 'opacity-50' : ''}\`}
+              onClick={!isDisabled ? onClick : undefined}
+              disabled={isDisabled}
+              aria-busy={isLoading}
+            >
+              {isLoading ? <span className='loader animation-spin inline-block mr-2'></span> : label}
+            </button>
+          );
+        }",
+        "notes": "Basic React component structure with default props and conditional rendering."
       }`,
       agent: agents[1],
     }),
