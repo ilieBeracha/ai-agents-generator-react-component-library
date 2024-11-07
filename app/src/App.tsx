@@ -1,9 +1,27 @@
 import "./App.css";
+import { Routes, Route } from "react-router-dom";
+import Home from "./views/Home";
+import Auth from "./views/Auth";
+import { authStore } from "@/store/authStore";
+import { useStore } from "zustand";
+import { useEffect } from "react";
 
 function App() {
+  const useAuthStore = useStore(authStore);
+
+  useEffect(() => {
+    useAuthStore.checkAuth();
+  }, [useAuthStore.isLoggedIn]);
+
   return (
     <div>
-      <h1 className="text-red-200 text-4xl font-bold">Hello World</h1>
+      <Routes>
+        {useAuthStore.isLoggedIn ? (
+          <Route path="*" element={<Home />} />
+        ) : (
+          <Route path="*" element={<Auth />} />
+        )}
+      </Routes>
     </div>
   );
 }
