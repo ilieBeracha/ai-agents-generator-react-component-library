@@ -1,8 +1,21 @@
-import { executeAgents, saveComponentInDB } from "../2-logic/agentsLogic";
+import {
+  executeAgents,
+  getGenerations,
+  saveComponentInDB,
+} from "../2-logic/agentsLogic";
 import express from "express";
 import { componentTemplates } from "../helpers/componentsTemplates";
+import { GenerationsInDB } from "../types/agent";
 
 export const AgentsRoute = express();
+
+AgentsRoute.get(
+  "/get-generated-components",
+  async (req: any, res): Promise<GenerationsInDB[] | any> => {
+    const generations = await getGenerations();
+    res.json(generations);
+  }
+);
 
 AgentsRoute.post("/generate-component", async (req: any, res): Promise<any> => {
   try {

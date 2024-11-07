@@ -4,7 +4,7 @@ import path from "path";
 import {
   AgentConfig,
   AIGenerationResponse,
-  GeneratedResult,
+  GeneratedResultParsed,
   TaskConfig,
   TeamConfig,
 } from "../types/agent";
@@ -97,18 +97,7 @@ export const executeAgents = async (
 
   try {
     const result: any = await team.start();
-
-    const generatedCode = JSON.parse(result.result)
-      .code.replace(/\\n/g, "\n")
-      .replace(/\\"/g, '"');
-
-    const dirPath = path.join(__dirname, "../generated");
-    const filePath = path.join(dirPath, `${componentName}.tsx`);
-
-    // Save the file using the new saveFile method
-    const savedFilePath = saveFile(dirPath, filePath, generatedCode);
-
-    return { ...result, filePath: savedFilePath };
+    return result;
   } catch (error) {
     console.error("Error generating component:", error);
     throw new Error("An error occurred during component generation.");
@@ -119,8 +108,7 @@ export const saveComponentInDB = async (
   result: AIGenerationResponse,
   userId: string
 ) => {
-  console.log(result);
-  const parsedResult = JSON.parse(result.result) as GeneratedResult;
+  const parsedResult = JSON.parse(result.result) as GeneratedResultParsed;
 
   const generation = await prisma.generation.create({
     data: {
@@ -131,3 +119,7 @@ export const saveComponentInDB = async (
   });
   return generation;
 };
+
+export function getGenerations() {
+  return prisma.generation.findMany();
+}

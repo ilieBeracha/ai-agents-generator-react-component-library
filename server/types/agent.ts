@@ -60,7 +60,16 @@ export interface AIGenerationResponse {
 }
 
 // Optional: Interface for the parsed result content
-export interface GeneratedResult {
+export interface GeneratedResultParsed {
   code: string;
   notes: string;
+}
+
+export interface GenerationsInDB {
+  resultCode: string;
+  notes: string;
+  userId: string;
+  completedAt: string | null;
+  createdAt: string;
+  id: string;
 }

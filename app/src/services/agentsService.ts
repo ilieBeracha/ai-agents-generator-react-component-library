@@ -14,3 +14,10 @@ export async function generateComponent(
   );
   return response.data;
 }
+
+export async function getGeneratedComponents() {
+  const response = await axiosInstance.get(
+    `${endpoint.AGENTS}/get-generated-components`
+  );
+  return response.data;
+}
