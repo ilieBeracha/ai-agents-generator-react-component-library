@@ -1,10 +1,17 @@
 import dotenv from "dotenv";
 import { Agent, Task, Team } from "kaibanjs";
 import path from "path";
-import { AgentConfig, TaskConfig, TeamConfig } from "../types/agent";
+import {
+  AgentConfig,
+  AIGenerationResponse,
+  GeneratedResult,
+  TaskConfig,
+  TeamConfig,
+} from "../types/agent";
 import { generateComponentName } from "../helpers/generateComponentName";
 import { saveFile } from "../helpers/saveToFile";
 import { createSearchTool } from "../1-dal/initAgentSearch";
+import { prisma } from "../1-dal/prismaClient";
 
 dotenv.config();
 
@@ -18,7 +25,7 @@ const createTask = (config: TaskConfig) => new Task(config);
 const createComponentTeam = (config: TeamConfig) => new Team(config);
 
 // Main function to create, configure, execute the team, and save the output
-const setupComponentTeam = async (
+export const executeAgents = async (
   componentType: string,
   description: string
 ) => {
@@ -108,4 +115,19 @@ const setupComponentTeam = async (
   }
 };
 
-export { setupComponentTeam };
+export const saveComponentInDB = async (
+  result: AIGenerationResponse,
+  userId: string
+) => {
+  console.log(result);
+  const parsedResult = JSON.parse(result.result) as GeneratedResult;
+
+  const generation = await prisma.generation.create({
+    data: {
+      resultCode: parsedResult.code,
+      notes: parsedResult.notes,
+      userId: userId,
+    },
+  });
+  return generation;
+};

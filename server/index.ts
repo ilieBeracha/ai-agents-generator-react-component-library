@@ -1,6 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
-import { AgentsRoute } from "./3-routes/agentsRoute";
+import { AgentsRoute } from "./3-routes/agents";
 import { AuthRoute } from "./3-routes/auth";
 import { verifyToken } from "./middleware/jwt";
 import cors from "cors";

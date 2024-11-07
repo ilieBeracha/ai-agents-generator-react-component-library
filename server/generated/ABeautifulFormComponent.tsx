@@ -1,199 +1,116 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
 interface ABeautifulFormComponentProps {
-  label?: string;
-  styleType?: "primary" | "secondary";
-  isDisabled?: boolean;
-  isLoading?: boolean;
-  onClick: () => void;
+  onSubmit: (data: FormData) => void;
 }
 
 const defaultProps: ABeautifulFormComponentProps = {
-  label: "Submit",
-  styleType: "primary",
-  isDisabled: false,
-  isLoading: false,
-  onClick: () => console.log("Button clicked!"),
+  onSubmit: (data: FormData) => console.log('Form submitted with data:', data),
 };
 
-export default function ABeautifulFormComponent({
-  label,
-  styleType,
-  isDisabled,
-  isLoading,
-  onClick,
-}: ABeautifulFormComponentProps) {
-  const [formValues, setFormValues] = useState({
-    firstname: "",
-    lastname: "",
-    email: "",
-    password: "",
-    username: "",
-  });
+interface FormData {
+  firstname: string;
+  lastname: string;
+  email: string;
+  password: string;
+  username: string;
+}
 
-  const [errors, setErrors] = useState({});
+export default function ABeautifulFormComponent({ onSubmit }: ABeautifulFormComponentProps) {
+  const [formData, setFormData] = useState<FormData>({
+    firstname: '',
+    lastname: '',
+    email: '',
+    password: '',
+    username: '',
+  });
+  const [errors, setErrors] = useState<Partial<FormData>>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormValues({ ...formValues, [name]: value });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const validate = () => {
-    const newErrors: any = {};
-    // Example validation logic
-    if (!formValues.firstname) newErrors.firstname = "Firstname is required";
-    if (!formValues.lastname) newErrors.lastname = "Lastname is required";
-    if (!formValues.email) newErrors.email = "Email is required";
-    if (!formValues.password) newErrors.password = "Password is required";
-    if (!formValues.username) newErrors.username = "Username is required";
-    return newErrors;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const validationErrors = validate();
+    const validationErrors: Partial<FormData> = {};
+    if (!formData.firstname) validationErrors.firstname = 'Firstname is required';
+    if (!formData.email) validationErrors.email = 'Email is required';
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
-    } else {
-      onClick(); // Call the onClick prop
+      return;
     }
+    onSubmit(formData);
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-4 max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md"
-    >
+    <form onSubmit={handleSubmit} aria-label="A beautiful form component" className="max-w-lg mx-auto p-4 bg-white shadow-md rounded-lg space-y-4">
       <div>
-        <label
-          htmlFor="firstname"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Firstname
-        </label>
+        <label htmlFor="firstname" className="block text-sm font-medium text-gray-700">Firstname</label>
         <input
           type="text"
           name="firstname"
-          placeholder="Enter your firstname"
-          value={formValues.firstname}
+          id="firstname"
+          value={formData.firstname}
           onChange={handleChange}
-          className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+          placeholder="Enter your firstname"
           aria-describedby="firstname-error"
+          className={`mt-1 block w-full border rounded-md shadow-sm p-2 ${errors.firstname ? 'border-red-500' : 'border-gray-300'} focus:ring focus:ring-gray-200`} // Added Tailwind classes
         />
-        {errors.firstname && (
-          <span id="firstname-error" className="text-red-600 text-sm">
-            {errors.firstname}
-          </span>
-        )}
+        {errors.firstname && <span id="firstname-error" className="text-red-500 text-sm">{errors.firstname}</span>}
       </div>
       <div>
-        <label
-          htmlFor="lastname"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Lastname
-        </label>
+        <label htmlFor="lastname" className="block text-sm font-medium text-gray-700">Lastname</label>
         <input
           type="text"
           name="lastname"
-          placeholder="Enter your lastname"
-          value={formValues.lastname}
+          id="lastname"
+          value={formData.lastname}
           onChange={handleChange}
-          className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-          aria-describedby="lastname-error"
+          placeholder="Enter your lastname"
+          className="mt-1 block w-full border rounded-md shadow-sm p-2 border-gray-300 focus:ring focus:ring-gray-200"
         />
-        {errors.lastname && (
-          <span id="lastname-error" className="text-red-600 text-sm">
-            {errors.lastname}
-          </span>
-        )}
       </div>
       <div>
-        <label
-          htmlFor="email"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Email
-        </label>
+        <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
         <input
           type="email"
           name="email"
-          placeholder="Enter your email"
-          value={formValues.email}
+          id="email"
+          value={formData.email}
           onChange={handleChange}
-          className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+          placeholder="Enter your email"
           aria-describedby="email-error"
+          className={`mt-1 block w-full border rounded-md shadow-sm p-2 ${errors.email ? 'border-red-500' : 'border-gray-300'} focus:ring focus:ring-gray-200`} // Added Tailwind classes
         />
-        {errors.email && (
-          <span id="email-error" className="text-red-600 text-sm">
-            {errors.email}
-          </span>
-        )}
+        {errors.email && <span id="email-error" className="text-red-500 text-sm">{errors.email}</span>}
       </div>
       <div>
-        <label
-          htmlFor="password"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Password
-        </label>
+        <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
         <input
           type="password"
           name="password"
-          placeholder="Enter your password"
-          value={formValues.password}
+          id="password"
+          value={formData.password}
           onChange={handleChange}
-          className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-          aria-describedby="password-error"
+          placeholder="Enter your password"
+          className="mt-1 block w-full border rounded-md shadow-sm p-2 border-gray-300 focus:ring focus:ring-gray-200"
         />
-        {errors.password && (
-          <span id="password-error" className="text-red-600 text-sm">
-            {errors.password}
-          </span>
-        )}
       </div>
       <div>
-        <label
-          htmlFor="username"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Username
-        </label>
+        <label htmlFor="username" className="block text-sm font-medium text-gray-700">Username</label>
         <input
           type="text"
           name="username"
-          placeholder="Enter your username"
-          value={formValues.username}
+          id="username"
+          value={formData.username}
           onChange={handleChange}
-          className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-          aria-describedby="username-error"
+          placeholder="Enter your username"
+          className="mt-1 block w-full border rounded-md shadow-sm p-2 border-gray-300 focus:ring focus:ring-gray-200"
         />
-        {errors.username && (
-          <span id="username-error" className="text-red-600 text-sm">
-            {errors.username}
-          </span>
-        )}
       </div>
-      <button
-        className={`mt-4 px-4 py-2 font-semibold text-white rounded-lg focus:outline-none transition duration-300 ease-in-out ${
-          styleType === "primary"
-            ? "bg-blue-500 hover:bg-blue-600"
-            : "bg-gray-500 hover:bg-gray-600"
-        } ${isDisabled ? "bg-gray-300 cursor-not-allowed" : ""} ${
-          isLoading ? "opacity-50" : ""
-        }`}
-        onClick={!isDisabled ? onClick : undefined}
-        disabled={isDisabled}
-        aria-busy={isLoading}
-      >
-        {isLoading ? (
-          <span className="loader animation-spin inline-block mr-2"></span>
-        ) : (
-          label
-        )}
-      </button>
+      <button type="submit" className="mt-4 w-full bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300">Submit</button>
     </form>
   );
-}
+};
 
 ABeautifulFormComponent.defaultProps = defaultProps;
