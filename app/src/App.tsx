@@ -14,7 +14,7 @@ function App() {
   }, [useAuthStore.isLoggedIn]);
 
   return (
-    <div>
+    <div style={{ minHeight: "100vh", width: "100vw" }}>
       <Routes>
         {useAuthStore.isLoggedIn ? (
           <Route path="*" element={<Home />} />

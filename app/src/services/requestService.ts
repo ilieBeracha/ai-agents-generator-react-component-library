@@ -16,7 +16,7 @@ export const axiosInstance: AxiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
   (config: any) => {
-    const token = localStorage.getItem("codeQuestAccess");
+    const token = localStorage.getItem("token");
 
     if (token) {
       if (!config.headers) config.headers = {};

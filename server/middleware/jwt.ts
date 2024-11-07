@@ -7,6 +7,7 @@ dotenv.config();
 
 export const verifyToken = (req: any, res: any, next: any) => {
   const token = req.headers.authorization?.split(" ")[1];
+  console.log(token);
 
   if (!token) {
     return res.status(401).json({ message: "Missing token" });

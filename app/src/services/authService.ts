@@ -2,10 +2,10 @@ import { endpoint } from "@/globals";
 import { axiosInstance } from "@/services/requestService";
 import { User } from "@/types/User";
 
-export async function login(email: string, password: string) {
+export async function login(user: Partial<User>) {
   const response = await axiosInstance.post(`${endpoint.AUTH}/login`, {
-    email,
-    password,
+    email: user.email,
+    password: user.password,
   });
 
   return response.data;

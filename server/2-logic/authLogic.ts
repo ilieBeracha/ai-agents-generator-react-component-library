@@ -20,7 +20,10 @@ export async function login(email: string, password: string) {
 
     const token = generateToken(user);
 
-    return token;
+    return {
+      status: 200,
+      token: token,
+    };
   } catch (error: any) {
     return { status: 500, message: error };
   }
@@ -41,7 +44,10 @@ export async function register(user: User) {
 
     const token = generateToken(createdUser);
 
-    return token;
+    return {
+      status: 200,
+      token: token,
+    };
   } catch (error: any) {
     return { status: 500, message: error };
   }

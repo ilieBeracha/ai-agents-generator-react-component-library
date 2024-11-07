@@ -5,7 +5,6 @@ export const AuthRoute = express.Router();
 
 AuthRoute.post("/login", async (req: Request, res: Response): Promise<any> => {
   try {
-    console.log(req.body);
     const { email, password } = req.body;
     const result = await login(email, password);
 
