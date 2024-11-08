@@ -1,27 +1,11 @@
 import { useState } from "react";
-import { DynamicComponent } from "./DynamicComponent";
 import { Code } from "lucide-react";
 import { CodeEditor } from "./CodeEditor";
 import { GenerationsInDB } from "@/types/agent";
+import { DynamicComponent } from "./DynamicComponent";
 
-// Helper function to format the code
 const formatCode = (code: string) => {
   try {
-    // Parse and stringify with indentation
-    const parsed = JSON.parse(`{"code": ${code}}`).code;
-
-    // Replace escaped characters
-    return (
-      parsed
-        .replace(/\\n/g, "\n")
-        .replace(/\\"/g, '"')
-        // Add proper indentation
-        .split("\n")
-        .map((line: string) => line.trim())
-        .join("\n")
-    );
-  } catch {
-    // Fallback if parsing fails
     return code
       .replace(/\\n/g, "\n")
       .replace(/\\"/g, '"')
@@ -30,6 +14,8 @@ const formatCode = (code: string) => {
       .replace(/(})/g, "\n$1")
       .replace(/;/g, ";\n")
       .replace(/\/\//g, "\n//");
+  } catch {
+    return code;
   }
 };
 
@@ -55,9 +41,12 @@ export function DynamicComponentWrapper({
   };
 
   return (
-    <div className="rounded-lg p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="columns-1 sm:columns-2 gap-6 space-y-6 p-4">
       {generations.map((generation, index) => (
-        <div key={index} className="relative bg-white rounded-xl shadow-md p-6">
+        <div
+          key={index}
+          className="break-inside-avoid-column bg-gray-200 rounded-xl shadow-md p-6 relative inline-block w-full"
+        >
           {/* Toggle Button */}
           <button
             onClick={() => toggleView(index)}
@@ -74,17 +63,15 @@ export function DynamicComponentWrapper({
             {generation.componentName} | {generation.componentType}
           </div>
 
-          {/* Component/Code View */}
           <div className="mt-6">
             {viewStates[index] === "component" ? (
-              <div className="flex items-center justify-center min-h-[200px]">
-                <DynamicComponent code={generation.resultCode} />
+              <div className="flex items-center justify-center w-full">
+                <DynamicComponent html={generation.resultCode} />
               </div>
             ) : (
               <div className="relative">
                 <pre className="bg-gray-50 rounded-lg p-4 overflow-x-auto text-sm text-gray-800 whitespace-pre-wrap break-words">
                   <code className="block min-w-full">
-                    {/* {formatCode(generation.resultCode)} */}
                     <CodeEditor
                       code={formatCode(generation.resultCode)}
                       handleChange={() => {}}

@@ -8,7 +8,6 @@ export const saveComponentInDB = async (
   componentType: string
 ) => {
   const parsedResult = JSON.parse(result.result) as GeneratedResultParsed;
-
   return await prisma.generation.create({
     data: {
       resultCode: parsedResult.code,
