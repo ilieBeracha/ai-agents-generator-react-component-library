@@ -1,11 +1,9 @@
-import {
-  executeAgents,
-  getGenerations,
-  saveComponentInDB,
-} from "../2-logic/agentsLogic";
+import { executeAgents } from "../2-logic/agentsLogic";
+import { saveComponentInDB } from "../2-logic/componentLogic";
 import express from "express";
 import { componentTemplates } from "../helpers/componentsTemplates";
 import { GenerationsInDB } from "../types/agent";
+import { getGenerations } from "../2-logic/componentLogic";
 
 export const AgentsRoute = express();
 
@@ -43,15 +41,11 @@ AgentsRoute.post("/generate-component", async (req: any, res): Promise<any> => {
     }
 
     const generatedComponent: any = await executeAgents(
-      template.componentName,
-      description
-    );
-
-    const savedComponent = await saveComponentInDB(
-      generatedComponent,
+      componentType,
+      description,
       req.userId
     );
-    res.json(savedComponent);
+    res.json(generatedComponent);
   } catch (error) {
     console.error("Error generating component:", error);
     res.status(500).json({

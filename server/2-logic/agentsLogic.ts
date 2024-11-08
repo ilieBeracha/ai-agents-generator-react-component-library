@@ -1,78 +1,82 @@
 import dotenv from "dotenv";
-import { Agent, Task, Team } from "kaibanjs";
-import path from "path";
 import {
-  AgentConfig,
-  AIGenerationResponse,
-  GeneratedResultParsed,
-  TaskConfig,
-  TeamConfig,
-} from "../types/agent";
-import { generateComponentName } from "../helpers/generateComponentName";
-import { saveFile } from "../helpers/saveToFile";
-import { createSearchTool } from "../1-dal/initAgentSearch";
-import { prisma } from "../1-dal/prismaClient";
+  createAgent,
+  createTask,
+  createComponentTeam,
+  getSearchTool,
+} from "../1-dal/initAgentSearch";
+import {
+  getComponentTemplate,
+  generateComponentNameWrapper,
+  extractRelevantProps,
+} from "../helpers/componentsTemplates";
+import { saveComponentInDB } from "./componentLogic";
+import { AIGenerationResponse } from "../types/agent";
 
 dotenv.config();
 
-// Create individual agents
-const createAgent = (config: AgentConfig) => new Agent(config);
-
-// Create individual tasks
-const createTask = (config: TaskConfig) => new Task(config);
-
-// Create team
-const createComponentTeam = (config: TeamConfig) => new Team(config);
-
-// Main function to create, configure, execute the team, and save the output
 export const executeAgents = async (
   componentType: string,
-  description: string
+  description: string,
+  userId: string
 ) => {
-  const componentName = generateComponentName(description);
-  const searchTool = createSearchTool(process.env.TAVILY_API_KEY!);
+  const componentName = generateComponentNameWrapper(description);
+  const searchTool = getSearchTool();
+  const template = getComponentTemplate(componentType);
 
-  // Agents configuration
   const agents = [
     createAgent({
       name: "Luna",
       role: "Component Researcher",
-      goal: "Find and summarize best practices for the required React component",
-      background: "Experienced in front-end development and UX research",
+      goal: "Find best practices",
+      background: "Frontend Dev",
       tools: [searchTool as any],
     }),
     createAgent({
       name: "Nova",
       role: "Structure Designer",
-      goal: "Create the skeleton and structure of the React component based on research",
-      background:
-        "Frontend developer skilled in component design and architecture",
+      goal: "Design component structure",
+      background: "Frontend Dev",
       tools: [],
     }),
     createAgent({
       name: "Zen",
       role: "Tailwind Stylist",
-      goal: "Apply Tailwind CSS classes to ensure the component is visually appealing and responsive",
-      background:
-        "UI/UX designer with a focus on Tailwind CSS and responsive design",
+      goal: "Apply Tailwind CSS",
+      background: "UI/UX Designer",
       tools: [],
     }),
   ];
 
-  // Dynamic tasks with TypeScript support and unique component name
   const tasks = [
     createTask({
       title: "Research Component Requirements",
-      description: `Research best practices for creating a React component for: ${componentType}\n${description}`,
-      expectedOutput: `{"code": "", "notes": "Summary of best practices and feature requirements for the component."}`,
+      description: `Research best practices for creating a React ${componentType} component based on the provided description.\n
+      Description: ${description}\n\n${
+        template
+          ? `Include these specific props based on the description:\n${extractRelevantProps(
+              description,
+              template
+            )}`
+          : ""
+      }\n
+      - Focus on best practices for accessibility, responsiveness, and performance.
+      - Consider modern UI/UX principles and Tailwind CSS utility classes.
+      - Ensure the component adheres to design patterns that are common for ${componentType} components.
+      - Include recommendations on prop usage, structure, and default values.`,
+      expectedOutput: `{
+        "code": "",
+        "notes": "Research summary including best practices and related props."
+      }`,
       agent: agents[0],
     }),
     createTask({
       title: "Component Structure Design",
       description: `Design a plain JavaScript React component for ${componentName}.\n
         - Avoid export statements or imports.
+        - Avoid using any other libraries or frameworks.
         - Return the component function directly so it can be evaluated as an inline function.
-        - Include default values for props within the component.
+        - Include default values for props within the component (with actual values, not just "undefined" / "null" / "..." / [] / {} / etc.).
         Example structure:\n
         "function ${componentName}(props) { return (<div>...</div>); }"`,
       expectedOutput: `{
@@ -94,44 +98,26 @@ export const executeAgents = async (
     }),
     createTask({
       title: "Tailwind Styling Task",
-      description: `Apply Tailwind CSS classes to the ${componentName} JSX structure, ensuring responsiveness and visual appeal\n${description}`,
-      expectedOutput: `{"code": "<Tailwind CSS classes applied to JSX structure>", "notes": "Responsive Tailwind CSS styling for the component to ensure a visually appealing result."}`,
+      description: `Style the component using Tailwind CSS.`,
+      expectedOutput: `{"code": "...", "notes": "Styled component"}`,
       agent: agents[2],
     }),
   ];
 
   const team = createComponentTeam({
-    name: "React Component Creation Team",
+    name: "React Component Creation",
     agents,
     tasks,
     env: { OPENAI_API_KEY: process.env.OPENAI_API_KEY! },
   });
 
-  try {
-    const result: any = await team.start();
-    return result;
-  } catch (error) {
-    console.error("Error generating component:", error);
-    throw new Error("An error occurred during component generation.");
-  }
+  const teamResult = await team.start();
+
+  const DBResult = await saveComponentInDB(
+    teamResult as unknown as AIGenerationResponse,
+    userId,
+    componentName,
+    componentType
+  );
+  return DBResult;
 };
-
-export const saveComponentInDB = async (
-  result: AIGenerationResponse,
-  userId: string
-) => {
-  const parsedResult = JSON.parse(result.result) as GeneratedResultParsed;
-
-  const generation = await prisma.generation.create({
-    data: {
-      resultCode: parsedResult.code,
-      notes: parsedResult.notes,
-      userId: userId,
-    },
-  });
-  return generation;
-};
-
-export function getGenerations() {
-  return prisma.generation.findMany();
-}

@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import * as Babel from "@babel/standalone";
 
 export function DynamicComponent({ code }: { code: string }) {
+  console.log("code", code);
   const formattedCode = formatGeneratedCode(code);
   const transformedCode: any = useMemo(
     () => transformCode(formattedCode),

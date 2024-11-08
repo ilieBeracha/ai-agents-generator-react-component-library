@@ -1,8 +1,9 @@
 export interface GenerationsInDB {
+  id: string;
   resultCode: string;
   notes: string;
   userId: string;
-  completedAt: string | null;
   createdAt: string;
-  id: string;
+  componentName: string;
+  componentType: string;
 }
